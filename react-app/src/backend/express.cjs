@@ -7,14 +7,22 @@ app.use(express.json());
 
 app.post('/udito/:id', (req, res) => {
     // req.body json: {"nev":"Sprite","liter":1,"bubis-e":true}
-    const newFileLine = `${req.body.nev};${req.body.liter};${req.body["bubis-e"]}`;
+
+    // TODO - if id exists?
+
+    // if id does not exist yet:
+    const id = +req.params.id;
+
+    const newFileLine = `${req.params.id};${req.body.nev};${req.body.liter};${req.body["bubis-e"]}`;
     try {
         fs.appendFileSync('uditok.txt', newFileLine + "\n");
     } catch(e) {
         res.status(500).json({fileError: e});
     }
 
-    res.status(201).json(req.body);
+    const responseBody = {id, ...req.body}
+
+    res.status(201).json(responseBody);
 });
 
 app.use((req, res) => {
