@@ -5,6 +5,72 @@ const app = express();
 
 app.use(express.json());
 
+const uditoDataRead = function (data) {
+    // OK
+    console.log('GET data', data); // <Buffer 31 3b 53 70 72 69 74 65 3b 31 3b 74 72 75 65 0a 32 3b 53 70 72 69 74 65 3b 31 3b 74 72 75 65 0a 33 3b 53 70 72 69 74 65 3b 31 3b 74 72 75 65 0a>
+    
+    const lines = data.toString().split("\n");
+    console.log('lines', lines); // lines [ '1;Sprite;1;true', '2;Sprite;1;true', '3;Sprite;1;true', '' ]
+
+    const responseBodyArr = lines.map(line => {
+        // TODO - find;
+        if (line.length >= 1) {
+            const elements = line.split(';');
+            return {
+                id: +elements[0],
+                nev: elements[1],
+                liter: +elements[2],
+                "bubis-e": elements[3].trim() == 'true'
+            }
+        } else return undefined
+    });
+    if (!responseBodyArr[responseBodyArr.length - 1]) {
+        responseBodyArr.pop();
+    }
+
+    console.log('responseBodyArr', responseBodyArr);
+
+    return responseBodyArr;
+}
+
+app.get('/uditok', (req, res) => {
+    fs.readFile('uditok.txt', (err, data) => {
+        if (err) {
+            res.status(404).json({ fileError: err });
+        }
+        else {
+            if (data) {
+                const responseBodyArr = uditoDataRead(data);
+
+                res.status(200).json(responseBodyArr);
+            }
+            else {
+                res.status(404).json({ fileError: data });
+            }
+        }
+    });
+});
+
+app.get('/udito/:id', (req, res) => {
+    fs.readFile('uditok.txt', (err, data) => {
+        if (err) {
+            res.status(404).json({ fileError: err });
+        }
+        else {
+            if (data) {
+                const responseBodyArr = uditoDataRead(data);
+
+                const id = +req.params.id;
+
+                res.status(200).json(responseBodyArr[id-1]);
+            }
+            else {
+                res.status(404).json({ fileError: data });
+            }
+        }
+    });
+});
+
 app.post('/udito/:id', (req, res) => {
     // req.body json: {"nev":"Sprite","liter":1,"bubis-e":true}
 
@@ -16,11 +82,11 @@ app.post('/udito/:id', (req, res) => {
     const newFileLine = `${req.params.id};${req.body.nev};${req.body.liter};${req.body["bubis-e"]}`;
     try {
         fs.appendFileSync('uditok.txt', newFileLine + "\n");
-    } catch(e) {
-        res.status(500).json({fileError: e});
+    } catch (e) {
+        res.status(500).json({ fileError: e });
     }
 
-    const responseBody = {id, ...req.body}
+    const responseBody = { id, ...req.body };
 
     res.status(201).json(responseBody);
 });
