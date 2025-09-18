@@ -129,14 +129,32 @@ app.patch('/udito/:id', (req, res) => {
     const foundIndex = responseBodyArr.findIndex(udito => +udito.id == +id);
     console.log('foundIndex', foundIndex);
     if (foundIndex < 0) {
-        res.status(400).json({error: 'id not found'});
+        res.status(400).json({ error: 'id not found' });
     } else {
         console.log('req.body', req.body);
-        const responseBody = {id, ...req.body};
+        const responseBody = { id, ...req.body };
         console.log('responseBody', responseBody);
 
         responseBodyArr.splice(foundIndex, 1, responseBody);
         console.log('responseBodyArr after splice', responseBodyArr);
+        /*
+        const newFileLine = `${req.params.id};${req.body.nev};${req.body.liter};${req.body["bubis-e"]}`;
+        try {
+            fs.appendFileSync('uditok.txt', newFileLine + "\n");
+        } catch (e) {
+            res.status(500).json({ fileError: e });
+        }
+        */
+
+        let fileLines = "";
+        responseBodyArr.forEach(udito => {
+            const newFileLine = `${udito.id};${udito.nev};${udito.liter};${udito["bubis-e"]}\n`;
+            fileLines += newFileLine;
+        });
+        //console.log('fileLines', fileLines);
+
+        fs.writeFileSync('uditok.txt', fileLines);
+        
     }
 
     // TODO - respond actual
