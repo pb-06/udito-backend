@@ -1,3 +1,2 @@
 1;Sprite;1;true
 2;Sprite;1;true
-3;Sprite;1;true
