@@ -200,7 +200,7 @@ app.delete('/udito/:id', (req, res) => {
     try {
         // TODO - delete id line!
         console.log('id, data', id, data);
-        fs.writeFileSync('udito.txt', data);
+        fs.writeFileSync('uditok.txt', data);
     } catch (e) {
         res.status(500).json({ fileError: e });
     }
